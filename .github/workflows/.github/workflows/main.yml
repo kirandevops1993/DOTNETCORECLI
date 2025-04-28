@@ -1,12 +1,11 @@
 name: Main Workflow
-
 on:
   push:
     branches:
       - main
-
 jobs:
   dotnet-tasks:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         task:
@@ -14,31 +13,28 @@ jobs:
             projects: '**/*.csproj'
             feedsToUse: config
             nugetConfigPath: 'NuGet.config'
-
           - command: build
             projects: '**/*.csproj'
             arguments: '--configuration Release'
-
           - command: test
             projects: '**/*.csproj'
             arguments: '--collect "Code coverage"'
-
           - command: pack
             packagesToPack: '**/*.csproj'
             configuration: 'Release'
-
           - command: push
             packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
             nuGetFeedType: external
-
-    uses: kirandevops1993/DOTNETCORECLI-REUSABLES/.github/workflows/dotnetreusables.yml@main
-    with:
-      command: ${{ matrix.task.command }}
-      projects: ${{ matrix.task.projects || '' }}
-      arguments: ${{ matrix.task.arguments || '' }}
-      feedsToUse: ${{ matrix.task.feedsToUse || '' }}
-      nugetConfigPath: ${{ matrix.task.nugetConfigPath || '' }}
-      packagesToPack: ${{ matrix.task.packagesToPack || '' }}
-      configuration: ${{ matrix.task.configuration || '' }}
-      packagesToPush: ${{ matrix.task.packagesToPush || '' }}
-      nuGetFeedType: ${{ matrix.task.nuGetFeedType || '' }}
+    steps:
+      - name: Reusable Workflow - DotNet CLI Tasks
+        uses: kirandevops1993/DOTNETCORECLI-REUSABLES/.github/workflows/dotnetreusables.yml@main
+        with:
+          command: ${{ matrix.task.command }}
+          projects: ${{ matrix.task.projects || '' }}
+          arguments: ${{ matrix.task.arguments || '' }}
+          feedsToUse: ${{ matrix.task.feedsToUse || '' }}
+          nugetConfigPath: ${{ matrix.task.nugetConfigPath || '' }}
+          packagesToPack: ${{ matrix.task.packagesToPack || '' }}
+          configuration: ${{ matrix.task.configuration || '' }}
+          packagesToPush: ${{ matrix.task.packagesToPush || '' }}
+          nuGetFeedType: ${{ matrix.task.nuGetFeedType || '' }}
